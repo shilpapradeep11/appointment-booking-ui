@@ -73,7 +73,7 @@ const AppointmentForm = () => {
     };
   
     try {
-      const response = await axios.post("http://localhost:8080/api/appointment", payload);
+      const response = await axios.post("https://appointment-booking-api-cihz.onrender.com/api/appointment", payload);
   
       if (
         typeof response.data === "string" &&
@@ -181,7 +181,7 @@ const AppointmentForm = () => {
               className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-800 w-full"
               onClick={async () => {
                 try {
-                  const response = await axios.get("http://localhost:8080/api/colleagueDetails");
+                  const response = await axios.get("https://appointment-booking-api-cihz.onrender.com/api/colleagueDetails");
                   const colleagues = response.data;
                   if (!colleagues.length) {
                     alert("No colleagues found to assign feedback.");
@@ -191,7 +191,7 @@ const AppointmentForm = () => {
                   const randomColleague =
                     colleagues[Math.floor(Math.random() * colleagues.length)];
 
-                    await axios.post("http://localhost:8080/api/colleague-feedback", {
+                    await axios.post("https://appointment-booking-api-cihz.onrender.com/api/colleague-feedback", {
                       rating,
                       comment,
                       colleagueId: randomColleague.id,

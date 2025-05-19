@@ -20,7 +20,7 @@ const CustomerForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:8080/api/customers", customer);
+      const res = await axios.post("https://appointment-booking-api-cihz.onrender.com/api/customers", customer);
       const customerId = res.data.id;
 
       // Store customerId for use in appointment form

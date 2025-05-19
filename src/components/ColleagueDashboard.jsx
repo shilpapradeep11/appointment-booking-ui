@@ -24,7 +24,7 @@ const ColleagueDashboard = () => {
   const fetchAppointments = async (pageNumber = 0) => {
     try {
       const res = await axios.get(
-        `http://localhost:8080/api/manual-review-appointments?page=${pageNumber}&size=${pageSize}`
+        `https://appointment-booking-api-cihz.onrender.com/api/manual-review-appointments?page=${pageNumber}&size=${pageSize}`
       );
       setAppointments(res.data.content.map(appt => ({
         ...appt,
@@ -54,7 +54,7 @@ const ColleagueDashboard = () => {
       const appointment = appointments.find(appt => appt.appointmentId === appointmentId);
       if (!appointment) return;
   
-      await axios.post("http://localhost:8080/api/allocate-colleague", {
+      await axios.post("https://appointment-booking-api-cihz.onrender.com/api/allocate-colleague", {
         appointmentId: appointmentId,
         applicationType: appointment.applicationType,
       });
