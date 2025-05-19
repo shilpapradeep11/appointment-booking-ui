@@ -9,6 +9,17 @@ const ColleagueDashboard = () => {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const pageSize = 10;
+  const [allocating, setAllocating] = useState(false);
+  const [visibleSteps, setVisibleSteps] = useState([]);
+
+  const loadingSteps = [
+    "Assessing colleague workload",
+    "Detecting scheduling overlaps",
+    "Evaluating skill compatibility",
+    "Confirming urgency (within 24 hours)",
+  ];
+
+  
 
   const fetchAppointments = async (pageNumber = 0) => {
     try {
@@ -38,28 +49,74 @@ const ColleagueDashboard = () => {
 
   const handleAllocate = async (appointmentId) => {
     try {
+      setAllocating(true); // Start spinner
+  
       const appointment = appointments.find(appt => appt.appointmentId === appointmentId);
       if (!appointment) return;
   
-      // Send only required info
       await axios.post("http://localhost:8080/api/allocate-colleague", {
         appointmentId: appointmentId,
-        applicationType: appointment.applicationType
+        applicationType: appointment.applicationType,
       });
   
-      // setAllocatedIds((prev) => [...prev, appointmentId]);
+      await fetchAppointments(page);
   
-      // ✅ Re-fetch from backend to get the *actual* allocated colleague
-      await fetchAppointments(page);     
-      
+      // Wait until all spinner steps have been shown (~800ms * steps)
+      setTimeout(() => {
+        setAllocating(false);
+      }, loadingSteps.length * 800 + 300); // + buffer for smooth finish
     } catch (err) {
       console.error("Allocation failed", err);
       alert("Error during allocation.");
+      setAllocating(false); // Hide spinner on error
     }
   };
   
 
+useEffect(() => {
+    if (!allocating) {
+      setVisibleSteps([]);
+      return;
+    }
+  
+    const interval = setInterval(() => {
+      setVisibleSteps((prev) => {
+        if (prev.length < loadingSteps.length) {
+          return [...prev, loadingSteps[prev.length]];
+        } else {
+          clearInterval(interval);
+          return prev;
+        }
+      });
+    }, 800);
+  
+    return () => clearInterval(interval);
+  }, [allocating]);
+ 
+
   return (
+    <>
+    <div className="main-ui-content">
+      {/* your existing dashboard */}
+    </div>
+
+    {allocating && (
+      <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="bg-white p-6 rounded shadow text-center animate-pulse">
+          <div className="w-10 h-10 border-t-4 border-green-600 border-solid rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="font-semibold bg-green text-gray-800">AI model is evaluating assignment criteria...</p>
+          <ul className="text-sm text-gray-700 list-none mt-4 text-left">
+              {visibleSteps.map((step, index) => (
+                <li key={index} className="flex items-center gap-2">
+                  <span className="text-green-600 font-bold">✔️</span> {step}
+                </li>
+              ))}
+            </ul>
+        </div>
+      </div>
+    )}
+    
+
     <div className="flex flex-col h-screen bg-gray-50">
       {/* Header */}
       <div className="h-20 bg-green-800 w-full" />
@@ -159,6 +216,7 @@ const ColleagueDashboard = () => {
       {/* Footer stays at the bottom */}
       <div className="h-20 bg-green-800 w-full" />
     </div>
+    </>
   );
 };
 
