@@ -22,6 +22,8 @@ const AppointmentForm = () => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [visibleSteps, setVisibleSteps] = useState([]);
+  const [timeValidationMessage, setTimeValidationMessage] = useState("");
+
 
  useEffect(() => {
     if (submissionMessage) {
@@ -82,13 +84,12 @@ const AppointmentForm = () => {
         setSubmissionMessage("⚠️ No colleague is available at this time. Please choose a different date/time.");
         setSubmitting(false); // hide spinner immediately
         return;
-      }
-  
-      setSubmissionMessage("Your appointment has been submitted successfully!");
+      }     
   
       // Wait for the spinner steps to finish before showing feedback
-      setTimeout(() => {
+        setTimeout(() => {
         setSubmitting(false);    // hide spinner
+        setSubmissionMessage("Your appointment has been submitted successfully!");
         setShowFeedback(true);   // show feedback popup
       }, loadingSteps.length * 800 + 500); // timing for spinner steps
   
@@ -101,7 +102,7 @@ const AppointmentForm = () => {
       ) {
         setSubmissionMessage("⚠️ No colleague is available at this time. Please choose a different date/time.");
       } else {
-        setSubmissionMessage("Failed to submit appointment. Please try again.");
+        setSubmissionMessage("❌Failed to submit appointment. Please try again.");
         console.error(error);
       }
       setSubmitting(false); // move here instead of finally
@@ -288,7 +289,7 @@ const AppointmentForm = () => {
                   Select date and time
                 </p>
                 <div className="mb-6 flex justify-left">
-                  <input
+                <input
                     type="datetime-local"
                     className={`p-3 border-2 rounded w-2/3 transition ${
                       formData.requestedDate
@@ -296,11 +297,36 @@ const AppointmentForm = () => {
                         : "border-gray-300"
                     }`}
                     value={formData.requestedDate}
-                    onChange={handleDate}
+                    onChange={(e) => {
+                      const selectedDate = new Date(e.target.value);
+                      const day = selectedDate.getDay();
+                      const hour = selectedDate.getHours();
+
+                      if (day === 0 || day === 6) {
+                        setTimeValidationMessage("❌ Weekends are not allowed. Please choose a weekday.");
+                        return;
+                      }
+
+                      if (hour < 9 || hour >= 17) {
+                        setTimeValidationMessage("❌ Please choose a time between 9:00 AM and 5:00 PM.");
+                        return;
+                      }
+
+                      // ✅ Valid input — clear any previous message
+                      setTimeValidationMessage("");
+                      setFormData({ ...formData, requestedDate: e.target.value });
+                    }}
                   />
                 </div>
               </>
             )}
+
+              {timeValidationMessage && (
+                <div className="bg-red-100 text-red-700 font-medium px-4 py-2 rounded mb-4 text-center">
+                  {timeValidationMessage}
+                </div>
+              )}
+
 
             {/* Submit Button */}
             {formData.requestedDate && (
