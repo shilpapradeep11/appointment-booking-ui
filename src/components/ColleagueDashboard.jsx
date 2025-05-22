@@ -16,7 +16,6 @@ const ColleagueDashboard = () => {
     "Assessing colleague workload",
     "Detecting scheduling overlaps",
     "Evaluating skill compatibility",
-    "Confirming urgency (within 24 hours)",
   ];
 
   
